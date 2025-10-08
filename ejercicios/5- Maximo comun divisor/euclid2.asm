@@ -64,7 +64,7 @@ DONE:
     INT 21H
 
 ; -------------------------------------------------
-; Rutina para leer un numero de teclado (0-65535)
+; Rutina para leer un numero de teclado (0- 65535)
 ; Devuelve el numero en AX
 ; -------------------------------------------------
 READ_NUM PROC
@@ -122,3 +122,4 @@ PRINT_NUM ENDP
 
 CODE_SEG ENDS
 END START
+

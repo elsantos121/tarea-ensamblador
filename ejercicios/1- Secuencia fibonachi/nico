@@ -1,0 +1,88 @@
+.MODEL SMALL
+.STACK 100h
+
+.DATA
+    fib     DW 10 DUP(?)       ; Array para 10 n?meros Fibonacci
+    msg     DB 'Fibonacci: $'  ; Mensaje de t?tulo
+    space   DB ' $'            ; espacio + terminador $ (si quisieras)
+    newline DB 13,10,'$'       ; CR LF + $
+
+.CODE
+MAIN PROC
+    ; cargar segmento de datos usando SEG para evitar @DATA
+    MOV AX, SEG fib
+    MOV DS, AX
+
+    ; Inicializar primeros dos n?meros
+    MOV WORD PTR [fib], 0
+    MOV WORD PTR [fib+2], 1
+
+    ; Calcular secuencia
+    MOV CX, 8
+    MOV SI, 4
+FIB_LOOP:
+    MOV AX, [fib+SI-4]
+    ADD AX, [fib+SI-2]
+    MOV [fib+SI], AX
+    ADD SI, 2
+    LOOP FIB_LOOP
+
+    ; Mostrar mensaje inicial
+    MOV AH, 09h
+    LEA DX, msg
+    INT 21h
+    LEA DX, newline
+    INT 21h
+
+    ; Mostrar los 10 n?meros
+    MOV CX, 10
+    MOV SI, 0
+SHOW_LOOP:
+    MOV AX, [fib+SI]
+    CALL PRINT_NUMBER
+    LEA DX, newline
+    MOV AH, 09h
+    INT 21h
+    ADD SI, 2
+    LOOP SHOW_LOOP
+
+    ; Terminar programa
+    MOV AH, 4Ch
+    INT 21h
+MAIN ENDP
+
+;------------------------------------------------------
+; PRINT_NUMBER: imprime AX en decimal (positivo)
+;------------------------------------------------------
+PRINT_NUMBER PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+
+    MOV CX, 0
+    MOV BX, 10
+
+CONVERT_LOOP:
+    XOR DX, DX
+    DIV BX         ; AX = AX / 10 ; DX = remainder (digit)
+    PUSH DX
+    INC CX
+    CMP AX, 0
+    JNE CONVERT_LOOP
+
+PRINT_LOOP:
+    POP DX
+    ADD DL, '0'
+    MOV AH, 02h
+    INT 21h
+    LOOP PRINT_LOOP
+
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+PRINT_NUMBER ENDP
+
+END MAIN
